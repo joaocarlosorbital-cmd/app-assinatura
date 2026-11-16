@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enviar Documento</title>
+    <meta charset="UTF-8">
+</head>
+<body style="font-family: Arial; text-align: center; padding: 50px; background-color: #f0f5ff;">
+    <h2>1. Envie o PDF que precisa de assinatura</h2>
+    <input type="file" id="pdfFile" accept=".pdf" style="padding: 10px; font-size: 16px;">
+    <br><br>
+    <button onclick="enviarPDF()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Enviar PDF</button>
+    
+    <div id="linkAssinar" style="margin-top: 30px; font-size: 18px;"></div>
+
+    <script>
+        async function enviarPDF() {
+            const file = document.getElementById('pdfFile').files[0];
+            if(!file) return alert('Escolha um PDF primeiro!');
+            
+            const formData = new FormData();
+            formData.append('pdf', file);
+
+            document.getElementById('linkAssinar').innerHTML = "Enviando...";
+
+            const resposta = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const dados = await resposta.json();
+            
+            document.getElementById('linkAssinar').innerHTML = `
+                <p style="color: green; font-weight: bold;">PDF Recebido!</p>
+                <a href="${dados.link}" target="_blank">👉 Clique aqui para ir para a tela de assinatura</a>
+            `;
+        }
+    </script>
+</body>
+</html>
