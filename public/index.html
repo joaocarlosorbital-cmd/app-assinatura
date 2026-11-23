@@ -3,35 +3,54 @@
 <head>
     <title>Enviar Documento</title>
     <meta charset="UTF-8">
+    <!-- Deixa a tela bonita e adaptável para celular -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body style="font-family: Arial; text-align: center; padding: 50px; background-color: #f0f5ff;">
-    <h2>1. Envie o PDF que precisa de assinatura</h2>
-    <input type="file" id="pdfFile" accept=".pdf" style="padding: 10px; font-size: 16px;">
-    <br><br>
-    <button onclick="enviarPDF()" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">Enviar PDF</button>
     
+    <h2>1. Envie o PDF e o e-mail do funcionário</h2>
+    
+    <!-- Campo para escolher o PDF -->
+    <input type="file" id="pdfFile" accept=".pdf" style="padding: 10px; font-size: 16px; background: white; border: 1px solid #ccc; border-radius: 5px;"><br><br>
+    
+    <!-- Caixa de texto para o e-mail -->
+    <input type="email" id="emailFuncionario" placeholder="Digite o e-mail do funcionário" style="padding: 10px; font-size: 16px; width: 300px; border: 1px solid #ccc; border-radius: 5px;"><br><br>
+    
+    <!-- Botão que dispara a função -->
+    <button onclick="enviarPDF()" style="padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #0055ff; color: white; border: none; border-radius: 5px;">Enviar PDF e Notificar</button>
+    
+    <!-- Onde aparece a mensagem de sucesso e o link -->
     <div id="linkAssinar" style="margin-top: 30px; font-size: 18px;"></div>
 
     <script>
         async function enviarPDF() {
             const file = document.getElementById('pdfFile').files[0];
+            const email = document.getElementById('emailFuncionario').value;
+            
+            // Verifica se o usuário escolheu o PDF e digitou o e-mail
             if(!file) return alert('Escolha um PDF primeiro!');
+            if(!email) return alert('Digite o e-mail do funcionário!');
             
             const formData = new FormData();
             formData.append('pdf', file);
+            formData.append('email', email); // Envia o e-mail junto com o PDF
 
             document.getElementById('linkAssinar').innerHTML = "Enviando...";
 
-            const resposta = await fetch('/upload', {
-                method: 'POST',
-                body: formData
-            });
-            const dados = await resposta.json();
-            
-            document.getElementById('linkAssinar').innerHTML = `
-                <p style="color: green; font-weight: bold;">PDF Recebido!</p>
-                <a href="${dados.link}" target="_blank">👉 Clique aqui para ir para a tela de assinatura</a>
-            `;
+            try {
+                const resposta = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const dados = await resposta.json();
+                
+                document.getElementById('linkAssinar').innerHTML = `
+                    <p style="color: green; font-weight: bold;">${dados.message}</p>
+                    <a href="${dados.link}" target="_blank">👉 Clique aqui para ir para a tela de assinatura</a>
+                `;
+            } catch (erro) {
+                document.getElementById('linkAssinar').innerHTML = `<p style="color: red;">Erro ao enviar. Tente novamente.</p>`;
+            }
         }
     </script>
 </body>
